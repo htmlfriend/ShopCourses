@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Angular",
+    "price": "200",
+    "img": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%3Fid%3DOIP.GmMtKznzJ1dS8sSzxzR3owHaHa%26pid%3DApi&f=1",
+    "id": "c920ed22-4379-4642-8d00-a2509d566150"
+  },
+  {
+    "title": "React",
+    "price": "250",
+    "img": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%3Fid%3DOIP.BFV8Gwt5BILa-xv04IK2ngHaIl%26pid%3DApi&f=1",
+    "id": "b400791d-a3be-4d77-be0f-956a99535161"
+  }
+]
