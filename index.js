@@ -10,17 +10,20 @@ const hbs = exphbrs.create({
 const homeRouter = require("./routes/home");
 const coursesRouter = require("./routes/courses");
 const addRouter = require("./routes/add");
+const cardRouter = require("./routes/card");
 
 app.engine("hbs", hbs.engine);
 app.set("view engine", "hbs");
 app.set("views", "views");
 
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/", homeRouter);
 app.use("/add", addRouter);
 app.use("/courses", coursesRouter);
+app.use("/card", cardRouter);
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, (req, res) => {
