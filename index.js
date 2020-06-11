@@ -21,10 +21,23 @@ const homeRouter = require("./routes/home");
 const coursesRouter = require("./routes/courses");
 const addRouter = require("./routes/add");
 const cardRouter = require("./routes/card");
+//model USER
+const User = require("./models/user");
 
 app.engine("hbs", hbs.engine);
 app.set("view engine", "hbs");
 app.set("views", "views");
+
+// middleware
+app.use(async (req, res, next) => {
+  try {
+    const user = await User.findById("5ee14a46ebe9184240024301");
+    req.user = user;
+    next();
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
@@ -45,6 +58,16 @@ async function start() {
       useUnifiedTopology: true,
       useFindAndModify: false,
     });
+    //create user in system
+    const candidate = await User.findOne();
+    if (!candidate) {
+      const user = new User({
+        email: "Yura@mail.ru",
+        name: "Yurii",
+        cart: { items: [] },
+      });
+      await user.save();
+    }
     app.listen(PORT, (req, res) => {
       console.log("I am running ... on", PORT);
     });
