@@ -7,6 +7,7 @@ const session = require("express-session");
 const MongoStore = require("connect-mongodb-session")(session);
 const Handlebars = require("handlebars");
 const path = require("path");
+const keys = require("./keys");
 // fucking mongoose needs to resolve the property oh handelbars!!!
 // you need to install handlebars/allow-prototype-access
 // or try to install express-handlebars 4.5.0 or higher
@@ -24,10 +25,9 @@ const hbs = exphbrs.create({
   handlebars: allowInsecurePrototypeAccess(Handlebars),
 });
 
-const MONGODB_URI = process.env.url;
 const store = new MongoStore({
   collection: "sessions",
-  uri: MONGODB_URI,
+  uri: keys.MONGODB_URI,
 });
 
 const homeRouter = require("./routes/home");
@@ -56,7 +56,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(
   session({
-    secret: "some secret value",
+    secret: keys.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store,
@@ -79,7 +79,7 @@ async function start() {
   try {
     // const url = `mongodb+srv://user:password@cluster0-5y97q.mongodb.net/shop`;
     // remove user and password
-    await mongoose.connect(MONGODB_URI, {
+    await mongoose.connect(keys.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false,
