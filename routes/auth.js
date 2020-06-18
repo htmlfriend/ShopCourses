@@ -1,11 +1,13 @@
 const { Router } = require("express");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const router = Router();
 const nodemailer = require("nodemailer");
 const sendgrid = require("nodemailer-sendgrid-transport");
 const User = require("../models/user");
 const keys = require("../keys");
 const regEmail = require("../email/registration");
+const resetEmail = require("../email/reset");
 
 const transporter = nodemailer.createTransport(
   sendgrid({
@@ -84,4 +86,88 @@ router.post("/register", async (req, res) => {
   }
 });
 
+router.get("/reset", (req, res) => {
+  res.render("auth/reset", {
+    title: "Reset password",
+    error: req.flash("error"),
+  });
+});
+
+router.post("/reset", (req, res) => {
+  try {
+    //random key for dbase
+    crypto.randomBytes(32, async (err, buffer) => {
+      if (err) {
+        req.flash("error", "something was wrong. Try your attempt later");
+        return res.redirect("/auth/reset");
+      }
+
+      const token = buffer.toString("hex");
+
+      const candidate = await User.findOne({ email: req.body.email });
+
+      if (candidate) {
+        candidate.resetToken = token;
+        // time of expirened token = one hour
+        candidate.resetTokenExp = Date.now() + 60 * 60 * 1000;
+        await candidate.save();
+        await transporter.sendMail(resetEmail(candidate.email, token));
+        res.redirect("/auth/login");
+      } else {
+        req.flash("error", "This email does not exist");
+        res.redirect("/auth/reset");
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.get("/password/:token", async (req, res) => {
+  if (!req.params.token) {
+    return res.redirect("/auth/login");
+  }
+  try {
+    const user = await User.findOne({
+      resetToken: req.params.token,
+      resetTokenExp: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.redirect("/auth/login");
+    } else {
+      res.render("auth/password", {
+        title: "New password",
+        error: req.flash("error"),
+        userId: user._id.toString(),
+        token: req.params.token,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/password", async (req, res) => {
+  try {
+    const user = await User.findOne({
+      _id: req.body.userId,
+      resetToken: req.body.token,
+      resetTokenExp: { $gt: Date.now() },
+    });
+
+    if (user) {
+      user.password = await bcrypt.hash(req.body.password, 10);
+      user.resetToken = undefined;
+      user.resetTokenExp = undefined;
+      await user.save();
+      res.redirect("/auth/login");
+    } else {
+      req.flash("loginError", "Time of token is over");
+      res.redirect("/auth/login");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
 module.exports = router;

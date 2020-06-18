@@ -5,14 +5,16 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "update": "ncu -x lodash"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "express": "^4.17.1",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "npm-check-updates": "^7.0.1"
   },
   "dependencies": {
     "@handlebars/allow-prototype-access": "^1.0.3",
@@ -24,7 +26,7 @@
     "express-handlebars": "^4.0.4",
     "express-session": "^1.17.1",
     "handlebars": "^4.7.6",
-    "mongoose": "^5.9.18",
+    "mongoose": "^5.9.19",
     "nodemailer": "^6.4.8",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "uuid": "^8.1.0"

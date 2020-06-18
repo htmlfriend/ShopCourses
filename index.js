@@ -84,16 +84,7 @@ async function start() {
       useUnifiedTopology: true,
       useFindAndModify: false,
     });
-    //create user in system
-    // const candidate = await User.findOne();
-    // if (!candidate) {
-    //   const user = new User({
-    //     email: "Yura@mail.ru",
-    //     name: "Yurii",
-    //     cart: { items: [] },
-    //   });
-    //   await user.save();
-    // }
+
     app.listen(PORT, (req, res) => {
       console.log("I am running ... on", PORT);
     });
