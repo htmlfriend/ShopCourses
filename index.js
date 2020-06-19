@@ -7,6 +7,8 @@ const session = require("express-session");
 const MongoStore = require("connect-mongodb-session")(session);
 const Handlebars = require("handlebars");
 const path = require("path");
+const errorHandler = require("./middleware/error");
+const fileMiddleware = require("./middleware/file");
 const keys = require("./keys");
 // fucking mongoose needs to resolve the property oh handelbars!!!
 // you need to install handlebars/allow-prototype-access
@@ -36,12 +38,15 @@ const addRouter = require("./routes/add");
 const cardRouter = require("./routes/card");
 const ordersRouter = require("./routes/orders");
 const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
 
 app.engine("hbs", hbs.engine);
 app.set("view engine", "hbs");
 app.set("views", "views");
 
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/images", express.static(path.join(__dirname, "images")));
+
 app.use(express.urlencoded({ extended: true }));
 app.use(
   session({
@@ -51,6 +56,8 @@ app.use(
     store,
   })
 );
+//check image for avatar
+app.use(fileMiddleware.single("avatar"));
 app.use(csrf());
 app.use(flash());
 app.use(varMiddleware);
@@ -61,6 +68,9 @@ app.use("/courses", coursesRouter);
 app.use("/card", cardRouter);
 app.use("/orders", ordersRouter);
 app.use("/auth", authRouter);
+app.use("/profile", profileRouter);
+// error 404 page
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 

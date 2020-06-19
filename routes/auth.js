@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
+const { validationResult } = require("express-validator/check");
 const router = Router();
 const nodemailer = require("nodemailer");
 const sendgrid = require("nodemailer-sendgrid-transport");
@@ -8,6 +9,7 @@ const User = require("../models/user");
 const keys = require("../keys");
 const regEmail = require("../email/registration");
 const resetEmail = require("../email/reset");
+const { registerValidators, loginValidators } = require("../utils/validators");
 
 const transporter = nodemailer.createTransport(
   sendgrid({
@@ -61,26 +63,25 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/register", async (req, res) => {
+router.post("/register", registerValidators, async (req, res) => {
   try {
-    const { name, email, password, repeat } = req.body;
-    const candidate = await User.findOne({ email });
-    if (candidate) {
-      // if email is busy Try to use another email
-      req.flash("registerError", "This email is existed");
-      res.redirect("/auth/login#register");
-    } else {
-      const hashPassword = await bcrypt.hash(password, 10);
-      const user = new User({
-        email: email,
-        name: name,
-        password: hashPassword,
-        cart: { items: [] },
-      });
-      await user.save();
-      res.redirect("/auth/login#login");
-      await transporter.sendMail(regEmail(email));
+    const { name, email, password } = req.body;
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      req.flash("registerError", errors.array()[0].msg);
+      return res.status(422).redirect("/auth/login#register");
     }
+    const hashPassword = await bcrypt.hash(password, 10);
+    const user = new User({
+      email: email,
+      name: name,
+      password: hashPassword,
+      cart: { items: [] },
+    });
+    await user.save();
+    res.redirect("/auth/login#login");
+    await transporter.sendMail(regEmail(email));
   } catch (error) {
     console.log(error);
   }
