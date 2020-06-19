@@ -21,7 +21,7 @@ const app = express();
 const hbs = exphbrs.create({
   defaultLayout: "main",
   extname: "hbs",
-
+  helpers: require("./utils/hbs-helpers"),
   handlebars: allowInsecurePrototypeAccess(Handlebars),
 });
 
@@ -40,17 +40,6 @@ const authRouter = require("./routes/auth");
 app.engine("hbs", hbs.engine);
 app.set("view engine", "hbs");
 app.set("views", "views");
-
-// middleware
-// app.use(async (req, res, next) => {
-//   try {
-//     const user = await User.findById("5ee14a46ebe9184240024301");
-//     req.user = user;
-//     next();
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
